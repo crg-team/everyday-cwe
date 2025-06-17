@@ -1,5 +1,83 @@
 {{#*inline "page"}}
+<script>
 
+const width = window.innerWidth;
+const height = window.innerHeight;
+const hexRadius = 40;
 
+const svg = d3.select('body')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height)
+  .style('display', 'block')
+  .style('margin', 0)
+  .style('position', 'fixed')
+  .style('top', 0)
+  .style('left', 0)
+  .style('background', '#f9f9f9');
+
+const hexbin = d3.hexbin()
+  .radius(hexRadius)
+  .extent([[0, 0], [width, height]]);
+
+const points = [];
+for (let y = 0; y < height + hexRadius; y += hexRadius * Math.sqrt(3) / 2) {
+  for (let x = 0; x < width + hexRadius; x += hexRadius * 3 / 2) {
+    points.push([x, y]);
+  }
+}
+
+const hexesData = hexbin(points).map(d => {
+  const [col, row] = axialFromXY(d.x, d.y, hexRadius);
+  return { ...d, col, row };
+});
+
+function axialFromXY(x, y, r) {
+
+  const q = (x * 2/3) / r;
+  const rr = ((-x / 3) + (Math.sqrt(3)/3) * y) / r;
+
+  return [Math.round(q), Math.round(rr)];
+}
+
+function axialDistance(a, b) {
+  return Math.max(
+    Math.abs(a.col - b.col),
+    Math.abs(a.row - b.row),
+    Math.abs((-a.col - a.row) - (-b.col - b.row))
+  );
+}
+
+const hexes = svg.append('g')
+  .selectAll('path')
+  .data(hexesData)
+  .enter().append('path')
+  .attr('d', hexbin.hexagon())
+  .attr('transform', d => `translate(${d.x},${d.y})`)
+  .attr('fill', '#fff')
+  .attr('stroke', '#bbb')
+  .attr('stroke-width', 1.2)
+  .style('transition', 'fill 0.3s, transform 0.3s');
+
+hexes.on('mouseover', function(e, d) {
+  hexes.transition().duration(250)
+    .attr('fill', d2 => {
+      const dist = axialDistance(d, d2);
+      if (dist === 0) return '#e41a1c'; 
+      if (dist === 1) return '#888'; 
+      if (dist === 2) return '#ccc'; 
+      return '#fff';
+    })
+    .attr('transform', d2 => {
+      if (d2 === d) return `translate(${d2.x},${d2.y}) scale(1.15)`;
+      return `translate(${d2.x},${d2.y}) scale(1)`;
+    });
+})
+.on('mouseout', function() {
+  hexes.transition().duration(300)
+    .attr('fill', '#fff')
+    .attr('transform', d => `translate(${d.x},${d.y}) scale(1)`);
+});
+</script>
 {{/inline}}
 {{~> (lookup this "parent")~}}
