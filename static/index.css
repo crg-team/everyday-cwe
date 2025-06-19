@@ -1,1 +1,79 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+@media screen and (max-width: 700px) {
+  .layout p {
+    font-size: 20px !important;
+  }
+  .layout .box p {
+    font-size: 50px !important;
+    border-right: 0px !important;
+  }
+  .layout::before {
+    height: 30vw !important;
+  }
+  .layout .box span {
+    font-size: 20px !important;
+    max-width: 90vw !important;
+  }
+  .layout .box {
+    display: flex;
+    align-items: flex-start !important;
+    gap: 1vw;
+    flex-direction: column;
+  }
+}
+.layout {
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  z-index: 3;
+  display: block;
+  padding: 12px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 200;
+  pointer-events: none;
+  font-style: normal;
+}
+.layout::before {
+  bottom: 0;
+  content: "";
+  display: block;
+  z-index: -1;
+  position: absolute;
+  width: 100vw;
+  left: 0;
+  padding: 0;
+  margin: 0;
+  height: 13vw;
+  background: linear-gradient(180deg, rgba(254.58, 254.58, 254.58, 0) 0%, white 100%);
+  pointer-events: none;
+}
+.layout p {
+  color: #000;
+  margin: 0;
+  font-size: 2vw;
+}
 
+.layout .box p {
+  color: #e83937;
+  margin: 0;
+  font-size: 3vw;
+  border-right: 1px solid #cecece;
+  padding-right: 1vw;
+}
+.layout .box span {
+  color: #000;
+  font-size: 1.3vw;
+  max-width: 30vw;
+}
+
+.layout .box {
+  display: flex;
+  align-items: center;
+  gap: 1vw;
+}

@@ -1,6 +1,13 @@
 {{#*inline "page"}}
+<div class="layout">
+  <p>Research Concepts</p>
+  <div class="box">
+      <p id="current-cwe">{{currentCWE}}</p>
+      <span>Incorrect Permission Assignment for Critical Resource</span>
+  </div>
+</div>
 <script>
-
+let hexNames = [];
 const hexRadius = 40;
 
 const hexRelations = {
@@ -26,7 +33,6 @@ function getAllChildren(name, result=new Set()) {
 }
 
 function generateHexesData(x0, y0, x1, y1, k) {
-
   const r = hexRadius * k;
   const hexbin = d3.hexbin().radius(r).extent([[x0, y0], [x1, y1]]);
   const points = [];
@@ -37,7 +43,6 @@ function generateHexesData(x0, y0, x1, y1, k) {
   }
   let hexNum = 0;
   return hexbin(points).map((d, i) => {
-
     hexNum += 1;
     const name = `CWE-${String(hexNum).padStart(3, '0')}`;
     const [col, row] = axialFromXY((d.x-x0)/k, (d.y-y0)/k, hexRadius);
@@ -58,15 +63,11 @@ const svg = d3.select('body')
 
 const gHex = svg.append('g');
 
-let lastHoverName = null;
-
 function renderHexes(transform) {
   const x0 = -transform.x/transform.k, y0 = -transform.y/transform.k;
   const x1 = (window.innerWidth-transform.x)/transform.k, y1 = (window.innerHeight-transform.y)/transform.k;
   const hexesData = generateHexesData(x0, y0, x1, y1, transform.k);
-
-  const nameMap = {};
-  hexesData.forEach(d => { nameMap[d.name] = d; });
+  hexNames = hexesData.map(d => d.name);
 
   let hexes = gHex.selectAll('path').data(hexesData, d => d.name);
   hexes.exit().remove();
@@ -80,7 +81,7 @@ function renderHexes(transform) {
   hexes = hexesEnter.merge(hexes);
 
   hexes.on('mouseover', function(e, d) {
-    lastHoverName = d.name;
+    document.getElementById('current-cwe').textContent = d.name;
     const rel = hexRelations[d.name] || {};
     const highlightSet = new Set([d.name]);
     if (rel.parent) highlightSet.add(rel.parent);
@@ -98,7 +99,9 @@ function renderHexes(transform) {
         return `translate(${d2.x},${d2.y}) scale(1)`;
       });
   }).on('mouseout', function() {
-    lastHoverName = null;
+
+    document.getElementById('current-cwe').textContent =
+      hexNames.length ? hexNames[Math.floor(Math.random() * hexNames.length)] : '';
     hexes.transition().duration(180)
       .attr('fill', '#fff')
       .attr('transform', d => `translate(${d.x},${d.y}) scale(1)`);
@@ -126,6 +129,13 @@ renderHexes(d3.zoomIdentity);
 window.addEventListener('resize', () => {
   svg.attr('width', window.innerWidth).attr('height', window.innerHeight);
   renderHexes(d3.zoomTransform(svg.node()));
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (hexNames.length) {
+    document.getElementById('current-cwe').textContent =
+      hexNames[Math.floor(Math.random() * hexNames.length)];
+  }
 });
 </script>
 {{/inline}}
